@@ -293,13 +293,13 @@ const AdminDashboard = () => {
                         {shop.address}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2 ml-4">
+                    <div className="flex items-center gap-2 ml-4" onClick={(e) => e.stopPropagation()}>
                       <ShopEditor
                         shop={shop}
                         onSave={handleShopUpdate}
                         onDelete={handleShopDelete}
                         trigger={
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => e.stopPropagation()}>
                             <Edit className="h-4 w-4" />
                           </Button>
                         }
