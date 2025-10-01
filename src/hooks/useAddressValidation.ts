@@ -65,28 +65,7 @@ export const useAddressValidation = () => {
           message: `Géocodage de ${shop.name}...`
         });
 
-        // First, check for GPS coordinate inconsistencies with declared region/country
-        const gpsValidation = validateCoordinatesMatchRegion(
-          shop.latitude,
-          shop.longitude,
-          shop.region || '',
-          shop.country || ''
-        );
-        
-        if (!gpsValidation.isValid && gpsValidation.message) {
-          invalidShops.push({
-            shop,
-            status: 'invalid',
-            issues: [
-              'Incohérence géographique majeure',
-              gpsValidation.message,
-              'Vérifiez les coordonnées GPS et la région/pays déclarés'
-            ]
-          });
-          continue;
-        }
-
-        // Then check for postal code inconsistencies
+        // PRIORITY 1: Check postal code consistency FIRST (before GPS validation)
         // Enhanced postal code detection to handle missing leading zeros
         let cityPostalCode = shop.address.match(/(\d{5})/)?.[1];
         
@@ -99,7 +78,7 @@ export const useAddressValidation = () => {
           }
         }
         
-        let hasGeographicInconsistency = false;
+        let hasPostalCodeInconsistency = false;
         let suggestedDepartment = '';
         let suggestedRegion = '';
         
@@ -110,16 +89,19 @@ export const useAddressValidation = () => {
             suggestedDepartment = deptInfo.departmentName;
             suggestedRegion = deptInfo.region;
             
-            // Check if current department/region matches the postal code
-            if (shop.department.toLowerCase() !== deptInfo.departmentName.toLowerCase() || 
-                shop.region.toLowerCase() !== deptInfo.region.toLowerCase()) {
-              hasGeographicInconsistency = true;
+            // Check if current region matches the postal code region
+            // This is critical to detect cases like "2200, Martinique" where 2200 is in Hauts-de-France
+            const normalizedShopRegion = shop.region.toLowerCase().trim();
+            const normalizedSuggestedRegion = deptInfo.region.toLowerCase().trim();
+            
+            if (normalizedShopRegion !== normalizedSuggestedRegion) {
+              hasPostalCodeInconsistency = true;
             }
           }
         }
 
-        // Handle geographic inconsistency before geocoding
-        if (hasGeographicInconsistency) {
+        // Handle postal code inconsistency - this takes priority over GPS validation
+        if (hasPostalCodeInconsistency) {
           const correctedShop = {
             ...shop,
             department: suggestedDepartment,
@@ -130,9 +112,10 @@ export const useAddressValidation = () => {
             shop: correctedShop,
             status: 'corrected',
             issues: [
-              `Incohérence géographique détectée`,
-              `Code postal ${cityPostalCode} correspond à ${suggestedDepartment} (${suggestedRegion})`,
-              `Département/région automatiquement corrigés`
+              `Incohérence géographique détectée dans l'adresse`,
+              `Le code postal ${cityPostalCode} correspond à ${suggestedDepartment} (${suggestedRegion})`,
+              `Région modifiée de "${shop.region}" vers "${suggestedRegion}"`,
+              `Vérifiez que l'adresse complète est correcte`
             ],
             corrections: {
               originalLatitude: shop.latitude,
@@ -141,7 +124,46 @@ export const useAddressValidation = () => {
               correctedLongitude: shop.longitude,
               originalAddress: `${shop.department}, ${shop.region}`,
               correctedAddress: `${suggestedDepartment}, ${suggestedRegion}`,
-              addressCorrectionReason: 'Correction automatique basée sur le code postal'
+              addressCorrectionReason: `Correction automatique : le code postal ${cityPostalCode} n'est pas situé en ${shop.region}`
+            }
+          });
+          continue;
+        }
+
+        // PRIORITY 2: Check for GPS coordinate inconsistencies with declared region/country
+        const gpsValidation = validateCoordinatesMatchRegion(
+          shop.latitude,
+          shop.longitude,
+          shop.region || '',
+          shop.country || ''
+        );
+        
+        if (!gpsValidation.isValid && gpsValidation.message) {
+          // Suggest correction based on GPS coordinates
+          const detectedRegionName = gpsValidation.detectedRegion 
+            ? `${gpsValidation.detectedRegion}` 
+            : 'région inconnue';
+          
+          correctedShops.push({
+            shop: {
+              ...shop,
+              // Keep the shop data but flag it for manual review
+            },
+            status: 'corrected',
+            issues: [
+              'Incohérence géographique entre coordonnées GPS et région déclarée',
+              gpsValidation.message,
+              `Les coordonnées GPS (${shop.latitude}, ${shop.longitude}) ne correspondent pas à la région "${shop.region}"`,
+              'Vérifiez l\'adresse complète ou les coordonnées GPS'
+            ],
+            corrections: {
+              originalLatitude: shop.latitude,
+              originalLongitude: shop.longitude,
+              correctedLatitude: shop.latitude,
+              correctedLongitude: shop.longitude,
+              originalAddress: `${shop.address}, ${shop.department}, ${shop.region}`,
+              correctedAddress: `${shop.address}, ${shop.department}, ${shop.region}`,
+              addressCorrectionReason: `Attention: Les coordonnées GPS indiquent ${detectedRegionName} mais le commerce est déclaré en ${shop.region}`
             }
           });
           continue;
