@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Shop } from '@/types/shop';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Edit, Save, X, MapPin, Phone, Globe, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { COUNTRIES, getRegionsForCountry, getDepartmentsForRegion } from '@/data/geographicData';
 
 interface ShopEditorProps {
   shop: Shop;
@@ -22,6 +24,35 @@ const ShopEditor = ({ shop, onSave, onDelete, trigger }: ShopEditorProps) => {
   const [editedShop, setEditedShop] = useState<Shop>(shop);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+
+  // Available options based on selected country
+  const [availableRegions, setAvailableRegions] = useState(getRegionsForCountry(shop.country));
+  const [availableDepartments, setAvailableDepartments] = useState(
+    getDepartmentsForRegion(shop.country, shop.region)
+  );
+
+  // Update available regions when country changes
+  useEffect(() => {
+    const regions = getRegionsForCountry(editedShop.country);
+    setAvailableRegions(regions);
+    
+    // Reset region and department if country changed
+    if (regions.length > 0 && !regions.find(r => r.value === editedShop.region)) {
+      handleFieldChange('region', '');
+      handleFieldChange('department', '');
+    }
+  }, [editedShop.country]);
+
+  // Update available departments when region changes
+  useEffect(() => {
+    const departments = getDepartmentsForRegion(editedShop.country, editedShop.region);
+    setAvailableDepartments(departments);
+    
+    // Reset department if region changed
+    if (departments.length > 0 && !departments.find(d => d.value === editedShop.department)) {
+      handleFieldChange('department', '');
+    }
+  }, [editedShop.region, editedShop.country]);
 
   const handleSave = async () => {
     if (!editedShop.name.trim() || !editedShop.address.trim()) {
@@ -151,31 +182,76 @@ const ShopEditor = ({ shop, onSave, onDelete, trigger }: ShopEditorProps) => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="department">Département</Label>
-                  <Input
-                    id="department"
-                    value={editedShop.department}
-                    onChange={(e) => handleFieldChange('department', e.target.value)}
-                    placeholder="Département"
-                  />
+                  <Label htmlFor="country">Pays</Label>
+                  <Select 
+                    value={editedShop.country} 
+                    onValueChange={(value) => handleFieldChange('country', value)}
+                  >
+                    <SelectTrigger id="country">
+                      <SelectValue placeholder="Sélectionnez un pays" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COUNTRIES.map((country) => (
+                        <SelectItem key={country.value} value={country.value}>
+                          {country.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label htmlFor="region">Région</Label>
-                  <Input
-                    id="region"
-                    value={editedShop.region}
-                    onChange={(e) => handleFieldChange('region', e.target.value)}
-                    placeholder="Région"
-                  />
+                  {availableRegions.length > 0 ? (
+                    <Select 
+                      value={editedShop.region} 
+                      onValueChange={(value) => handleFieldChange('region', value)}
+                    >
+                      <SelectTrigger id="region">
+                        <SelectValue placeholder="Sélectionnez une région" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableRegions.map((region) => (
+                          <SelectItem key={region.value} value={region.value}>
+                            {region.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input
+                      id="region"
+                      value={editedShop.region}
+                      onChange={(e) => handleFieldChange('region', e.target.value)}
+                      placeholder="Région"
+                    />
+                  )}
                 </div>
                 <div>
-                  <Label htmlFor="country">Pays</Label>
-                  <Input
-                    id="country"
-                    value={editedShop.country}
-                    onChange={(e) => handleFieldChange('country', e.target.value)}
-                    placeholder="Pays"
-                  />
+                  <Label htmlFor="department">Département</Label>
+                  {availableDepartments.length > 0 ? (
+                    <Select 
+                      value={editedShop.department} 
+                      onValueChange={(value) => handleFieldChange('department', value)}
+                    >
+                      <SelectTrigger id="department">
+                        <SelectValue placeholder="Sélectionnez un département" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableDepartments.map((dept) => (
+                          <SelectItem key={dept.value} value={dept.value}>
+                            {dept.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input
+                      id="department"
+                      value={editedShop.department}
+                      onChange={(e) => handleFieldChange('department', e.target.value)}
+                      placeholder="Département"
+                    />
+                  )}
                 </div>
               </div>
             </div>
