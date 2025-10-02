@@ -26,10 +26,17 @@ const ShopEditor = ({ shop, onSave, onDelete, trigger }: ShopEditorProps) => {
   const { toast } = useToast();
 
   // Available options based on selected country
-  const [availableRegions, setAvailableRegions] = useState(getRegionsForCountry(shop.country));
-  const [availableDepartments, setAvailableDepartments] = useState(
-    getDepartmentsForRegion(shop.country, shop.region)
-  );
+  const [availableRegions, setAvailableRegions] = useState<{value: string; label: string}[]>([]);
+  const [availableDepartments, setAvailableDepartments] = useState<{value: string; label: string}[]>([]);
+
+  // Reset edited shop and available options when dialog opens or shop changes
+  useEffect(() => {
+    setEditedShop(shop);
+    const regions = getRegionsForCountry(shop.country);
+    setAvailableRegions(regions);
+    const departments = getDepartmentsForRegion(shop.country, shop.region);
+    setAvailableDepartments(departments);
+  }, [shop, isOpen]);
 
   // Update available regions when country changes
   useEffect(() => {
