@@ -29,36 +29,27 @@ const ShopEditor = ({ shop, onSave, onDelete, trigger }: ShopEditorProps) => {
   const [availableRegions, setAvailableRegions] = useState<{value: string; label: string}[]>([]);
   const [availableDepartments, setAvailableDepartments] = useState<{value: string; label: string}[]>([]);
 
-  // Reset edited shop and available options when dialog opens or shop changes
+  // Reset edited shop and available options when dialog opens
   useEffect(() => {
-    setEditedShop(shop);
-    const regions = getRegionsForCountry(shop.country);
-    setAvailableRegions(regions);
-    const departments = getDepartmentsForRegion(shop.country, shop.region);
-    setAvailableDepartments(departments);
+    if (isOpen) {
+      setEditedShop(shop);
+      const regions = getRegionsForCountry(shop.country);
+      setAvailableRegions(regions);
+      const departments = getDepartmentsForRegion(shop.country, shop.region);
+      setAvailableDepartments(departments);
+    }
   }, [shop, isOpen]);
 
   // Update available regions when country changes
   useEffect(() => {
     const regions = getRegionsForCountry(editedShop.country);
     setAvailableRegions(regions);
-    
-    // Reset region and department if country changed
-    if (regions.length > 0 && !regions.find(r => r.value === editedShop.region)) {
-      handleFieldChange('region', '');
-      handleFieldChange('department', '');
-    }
   }, [editedShop.country]);
 
   // Update available departments when region changes
   useEffect(() => {
     const departments = getDepartmentsForRegion(editedShop.country, editedShop.region);
     setAvailableDepartments(departments);
-    
-    // Reset department if region changed
-    if (departments.length > 0 && !departments.find(d => d.value === editedShop.department)) {
-      handleFieldChange('department', '');
-    }
   }, [editedShop.region, editedShop.country]);
 
   const handleSave = async () => {
@@ -111,10 +102,31 @@ const ShopEditor = ({ shop, onSave, onDelete, trigger }: ShopEditorProps) => {
   };
 
   const handleFieldChange = (field: keyof Shop, value: string | number) => {
-    setEditedShop(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setEditedShop(prev => {
+      const updated = {
+        ...prev,
+        [field]: value
+      };
+
+      // Reset region and department when country changes
+      if (field === 'country') {
+        const regions = getRegionsForCountry(value as string);
+        if (regions.length > 0 && !regions.find(r => r.value === prev.region)) {
+          updated.region = '';
+          updated.department = '';
+        }
+      }
+
+      // Reset department when region changes
+      if (field === 'region') {
+        const departments = getDepartmentsForRegion(prev.country, value as string);
+        if (departments.length > 0 && !departments.find(d => d.value === prev.department)) {
+          updated.department = '';
+        }
+      }
+
+      return updated;
+    });
   };
 
   return (
