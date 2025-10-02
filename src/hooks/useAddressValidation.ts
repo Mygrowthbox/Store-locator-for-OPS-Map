@@ -65,6 +65,13 @@ export const useAddressValidation = () => {
           message: `Géocodage de ${shop.name}...`
         });
 
+        console.log(`\n=== VALIDATING SHOP: ${shop.name} ===`);
+        console.log(`Address: ${shop.address}`);
+        console.log(`Region: ${shop.region}`);
+        console.log(`Department: ${shop.department}`);
+        console.log(`Country: ${shop.country}`);
+        console.log(`Coordinates: ${shop.latitude}, ${shop.longitude}`);
+
         // PRIORITY 1: Check postal code consistency FIRST (before GPS validation)
         // Enhanced postal code detection to handle all formats
         let cityPostalCode: string | null = null;
@@ -73,7 +80,7 @@ export const useAddressValidation = () => {
         const fiveDigitMatch = shop.address.match(/\b(\d{5})\b/)?.[1];
         if (fiveDigitMatch) {
           cityPostalCode = fiveDigitMatch;
-          console.log(`[${shop.name}] Found 5-digit postal code: ${cityPostalCode}`);
+          console.log(`[${shop.name}] ✓ Found 5-digit postal code: ${cityPostalCode}`);
         }
         
         // Handle 4-digit postal codes (missing leading zero) - common format error
@@ -81,7 +88,7 @@ export const useAddressValidation = () => {
           const fourDigitMatch = shop.address.match(/\b(\d{4})\b/)?.[1];
           if (fourDigitMatch && parseInt(fourDigitMatch) <= 9999) {
             cityPostalCode = '0' + fourDigitMatch;
-            console.log(`[${shop.name}] Detected 4-digit postal code ${fourDigitMatch}, converted to ${cityPostalCode}`);
+            console.log(`[${shop.name}] ✓ Detected 4-digit postal code ${fourDigitMatch}, converted to ${cityPostalCode}`);
           }
         }
         

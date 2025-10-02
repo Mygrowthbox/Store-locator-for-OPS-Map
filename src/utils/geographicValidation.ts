@@ -127,13 +127,24 @@ export const getDepartmentFromPostalCode = (postalCode: string): {
 } | null => {
   // Handle 4-digit postal codes (add leading zero)
   let code = postalCode;
-  if (code.length === 4 && parseInt(code) < 9999) {
+  if (code.length === 4 && parseInt(code) <= 9999) {
     code = '0' + code;
+    console.log(`[getDepartmentFromPostalCode] Converted 4-digit postal code ${postalCode} to ${code}`);
   }
   
-  if (code.length !== 5) return null;
+  if (code.length !== 5) {
+    console.log(`[getDepartmentFromPostalCode] Invalid postal code length: ${code} (length: ${code.length})`);
+    return null;
+  }
   
-  const departmentCode = code.substring(0, 2);
+  // Handle overseas departments (DOM-TOM) with 3-digit codes
+  let departmentCode = code.substring(0, 2);
+  if (code.startsWith('97') || code.startsWith('98')) {
+    departmentCode = code.substring(0, 3);
+    console.log(`[getDepartmentFromPostalCode] Detected overseas postal code: ${code}, department: ${departmentCode}`);
+  } else {
+    console.log(`[getDepartmentFromPostalCode] Mainland postal code: ${code}, department: ${departmentCode}`);
+  }
   
   const departmentMap: Record<string, { name: string; region: string }> = {
     '01': { name: 'Ain', region: 'Auvergne-Rhône-Alpes' },
@@ -238,7 +249,12 @@ export const getDepartmentFromPostalCode = (postalCode: string): {
   };
   
   const dept = departmentMap[departmentCode];
-  if (!dept) return null;
+  if (!dept) {
+    console.log(`[getDepartmentFromPostalCode] Department ${departmentCode} not found in map`);
+    return null;
+  }
+  
+  console.log(`[getDepartmentFromPostalCode] Found: ${dept.name} in ${dept.region}`);
   
   return {
     departmentCode,
