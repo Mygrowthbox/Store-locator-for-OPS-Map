@@ -64,7 +64,7 @@ const AdminDashboard = () => {
 
   const handleShopUpdate = (updatedShop: Shop) => {
     const updatedShops = shops.map(shop => 
-      shop.id === updatedShop.id ? updatedShop : shop
+      shop.id === updatedShop.id ? { ...updatedShop, id: shop.id } : shop
     );
     setShops(updatedShops);
     saveShopsToStorage(updatedShops);
@@ -219,9 +219,10 @@ const AdminDashboard = () => {
                 }
               }}
               onDeleteDuplicates={(shopsToDelete) => {
-                shopsToDelete.forEach(shop => {
-                  handleShopDelete(shop.id);
-                });
+                const idsToDelete = new Set(shopsToDelete.map(s => s.id));
+                const updatedShops = shops.filter(shop => !idsToDelete.has(shop.id));
+                setShops(updatedShops);
+                saveShopsToStorage(updatedShops);
                 toast({
                   title: "Doublons supprimés",
                   description: `${shopsToDelete.length} commerce${shopsToDelete.length > 1 ? 's' : ''} supprimé${shopsToDelete.length > 1 ? 's' : ''}`,

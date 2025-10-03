@@ -29,7 +29,7 @@ const ShopEditor = ({ shop, onSave, onDelete, trigger }: ShopEditorProps) => {
   const [availableRegions, setAvailableRegions] = useState<{value: string; label: string}[]>([]);
   const [availableDepartments, setAvailableDepartments] = useState<{value: string; label: string}[]>([]);
 
-  // Reset edited shop and available options when dialog opens
+  // Reset edited shop when dialog opens or when editing a different shop
   useEffect(() => {
     if (isOpen) {
       setEditedShop(shop);
@@ -38,7 +38,7 @@ const ShopEditor = ({ shop, onSave, onDelete, trigger }: ShopEditorProps) => {
       const departments = getDepartmentsForRegion(shop.country, shop.region);
       setAvailableDepartments(departments);
     }
-  }, [shop, isOpen]);
+  }, [shop.id, isOpen]);
 
   // Update available regions when country changes
   useEffect(() => {
@@ -92,12 +92,15 @@ const ShopEditor = ({ shop, onSave, onDelete, trigger }: ShopEditorProps) => {
 
   const handleDelete = () => {
     if (onDelete && window.confirm('Êtes-vous sûr de vouloir supprimer ce commerce ?')) {
-      onDelete(shop.id);
       setIsOpen(false);
-      toast({
-        title: "Commerce supprimé",
-        description: "Le commerce a été supprimé avec succès"
-      });
+      // Defer the deletion to allow dialog to close properly
+      setTimeout(() => {
+        onDelete(shop.id);
+        toast({
+          title: "Commerce supprimé",
+          description: "Le commerce a été supprimé avec succès"
+        });
+      }, 100);
     }
   };
 
