@@ -33,8 +33,9 @@ const VirtualizedShopList: React.FC<VirtualizedShopListProps> = ({
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
   // Debug logging
-  console.log('VirtualizedShopList received shops:', shops.length);
-  console.log('VirtualizedShopList shops sample:', shops.slice(0, 3).map(s => s.name));
+  console.log('📋 VIRTUALIZED LIST: Received shops count:', shops.length);
+  console.log('📋 VIRTUALIZED LIST: Received shops IDs:', shops.map(s => s.id).join(', '));
+  console.log('📋 VIRTUALIZED LIST: Sample names:', shops.slice(0, 3).map(s => s.name));
 
   const getCategoryIconComponent = (category: string) => {
     const iconName = getCategoryIcon(category);
@@ -67,7 +68,7 @@ const VirtualizedShopList: React.FC<VirtualizedShopListProps> = ({
   };
 
   const sortedShops = useMemo(() => {
-    return [...shops].sort((a, b) => {
+    const sorted = [...shops].sort((a, b) => {
       let aValue = a[sortField];
       let bValue = b[sortField];
       
@@ -78,6 +79,9 @@ const VirtualizedShopList: React.FC<VirtualizedShopListProps> = ({
       if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
       return 0;
     });
+    console.log('📋 VIRTUALIZED LIST: After sort, count:', sorted.length);
+    console.log('📋 VIRTUALIZED LIST: After sort, IDs:', sorted.map(s => s.id).join(', '));
+    return sorted;
   }, [shops, sortField, sortDirection]);
 
   const toggleSort = (field: SortField) => {

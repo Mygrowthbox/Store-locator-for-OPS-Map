@@ -186,6 +186,9 @@ const MapView = ({
   useEffect(() => {
     if (!markersRef.current) return;
 
+    console.log('🗺️ MAPVIEW: Received shops count:', shops.length);
+    console.log('🗺️ MAPVIEW: Received shops IDs:', shops.map(s => s.id).join(', '));
+
     markersRef.current.clearLayers();
 
     if (shops.length === 0) return;

@@ -33,8 +33,8 @@ const Index = () => {
 
   // Filter shops based on current filters
   const filteredShops = useMemo(() => {
-    console.log('Filtering with:', filters);
-    console.log('Total shops available:', shops.length);
+    console.log('🔍 INDEX: Filtering with:', filters);
+    console.log('🔍 INDEX: Total shops available:', shops.length);
     
     if (shops.length === 0) {
       console.log('No shops loaded');
@@ -79,7 +79,8 @@ const Index = () => {
       return result;
     });
     
-    console.log('Filtered results:', filtered.length);
+    console.log('🔍 INDEX: Filtered results:', filtered.length);
+    console.log('🔍 INDEX: Filtered shops IDs:', filtered.map(s => s.id).join(', '));
     if (filters.searchQuery && filtered.length === 0) {
       console.log('No results for search query:', filters.searchQuery);
     }
