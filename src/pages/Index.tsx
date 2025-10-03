@@ -17,9 +17,14 @@ const Index = () => {
   // Load shops from localStorage on component mount
   useEffect(() => {
     const savedShops = loadShopsFromStorage();
+    // Deduplicate shops by ID to avoid showing duplicates
+    const uniqueShops = Array.from(
+      new Map(savedShops.map(shop => [shop.id, shop])).values()
+    );
     console.log('Shops loaded from storage:', savedShops.length);
-    console.log('Sample shops:', savedShops.slice(0, 3));
-    setShops(savedShops);
+    console.log('Unique shops after deduplication:', uniqueShops.length);
+    console.log('Sample shops:', uniqueShops.slice(0, 3));
+    setShops(uniqueShops);
   }, []);
 
   const [filters, setFilters] = useState<MapFilters>({
