@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Shop } from '@/types/shop';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,7 +24,9 @@ const ShopEditor = ({ shop, onSave, onDelete, trigger }: ShopEditorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [editedShop, setEditedShop] = useState<Shop>(shop);
   const [isLoading, setIsLoading] = useState(false);
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const { toast } = useToast();
+  const originalShopId = shop.id;
 
   // Available options based on selected country
   const [availableRegions, setAvailableRegions] = useState<{value: string; label: string}[]>([]);
@@ -73,7 +76,9 @@ const ShopEditor = ({ shop, onSave, onDelete, trigger }: ShopEditorProps) => {
 
     setIsLoading(true);
     try {
-      onSave(editedShop);
+      // Préserver l'ID original pour éviter les doublons
+      const shopToSave = { ...editedShop, id: originalShopId };
+      onSave(shopToSave);
       setIsOpen(false);
       toast({
         title: "Succès",
@@ -91,11 +96,15 @@ const ShopEditor = ({ shop, onSave, onDelete, trigger }: ShopEditorProps) => {
   };
 
   const handleDelete = () => {
-    if (onDelete && window.confirm('Êtes-vous sûr de vouloir supprimer ce commerce ?')) {
+    setShowDeleteAlert(true);
+  };
+
+  const confirmDelete = () => {
+    if (onDelete) {
+      setShowDeleteAlert(false);
       setIsOpen(false);
-      // Defer the deletion to allow dialog to close properly
       setTimeout(() => {
-        onDelete(shop.id);
+        onDelete(originalShopId);
         toast({
           title: "Commerce supprimé",
           description: "Le commerce a été supprimé avec succès"
@@ -372,6 +381,23 @@ const ShopEditor = ({ shop, onSave, onDelete, trigger }: ShopEditorProps) => {
           </div>
         </div>
       </DialogContent>
+
+      <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir supprimer ce commerce ? Cette action est irréversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 };

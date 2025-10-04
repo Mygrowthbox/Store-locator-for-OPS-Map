@@ -2,7 +2,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { AlertTriangle, Copy, MapPin, Eye } from 'lucide-react';
+import { AlertTriangle, Copy, MapPin, Eye, Trash2 } from 'lucide-react';
 import { Shop } from '@/types/shop';
 import { DuplicateGroup } from '@/hooks/useDuplicateDetection';
 
@@ -83,36 +83,30 @@ const DuplicateAlert = ({ duplicates, onShopClick, onDeleteDuplicates, className
                     </div>
                   </div>
                   
-                  {onShopClick && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onShopClick(shop)}
-                      className="shrink-0 ml-2"
-                    >
-                      <Eye className="h-3 w-3 mr-1" />
-                      Voir
-                    </Button>
-                  )}
+                  <div className="flex items-center gap-2 shrink-0 ml-2">
+                    {onShopClick && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onShopClick(shop)}
+                      >
+                        <Eye className="h-3 w-3 mr-1" />
+                        Voir
+                      </Button>
+                    )}
+                    {onDeleteDuplicates && (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => onDeleteDuplicates([shop])}
+                      >
+                        <Trash2 className="h-3 w-3 mr-1" />
+                        Supprimer
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ))}
-            </div>
-
-            <div className="mt-3 flex gap-2">
-              <Button 
-                size="sm" 
-                variant="destructive"
-                onClick={() => {
-                  if (onDeleteDuplicates) {
-                    // Supprimer tous les doublons sauf le premier
-                    const shopsToDelete = group.shops.slice(1);
-                    onDeleteDuplicates(shopsToDelete);
-                  }
-                }}
-                className="flex-1"
-              >
-                Supprimer les doublons
-              </Button>
             </div>
           </Card>
         ))}
