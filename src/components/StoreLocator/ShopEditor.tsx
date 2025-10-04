@@ -323,23 +323,34 @@ const ShopEditor = ({ shop, onSave, onDelete, trigger }: ShopEditorProps) => {
               <Phone className="h-4 w-4" />
               Contact
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="phone">Téléphone</Label>
-                <Input
-                  id="phone"
-                  value={editedShop.phone || ''}
-                  onChange={(e) => handleFieldChange('phone', e.target.value)}
-                  placeholder="01 23 45 67 89"
-                />
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="phone">Téléphone</Label>
+                  <Input
+                    id="phone"
+                    value={editedShop.phone || ''}
+                    onChange={(e) => handleFieldChange('phone', e.target.value)}
+                    placeholder="01 23 45 67 89"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="website">Site web</Label>
+                  <Input
+                    id="website"
+                    value={editedShop.website || ''}
+                    onChange={(e) => handleFieldChange('website', e.target.value)}
+                    placeholder="https://www.exemple.com"
+                  />
+                </div>
               </div>
               <div>
-                <Label htmlFor="website">Site web</Label>
+                <Label htmlFor="imageUrl">URL de l'image/logo</Label>
                 <Input
-                  id="website"
-                  value={editedShop.website || ''}
-                  onChange={(e) => handleFieldChange('website', e.target.value)}
-                  placeholder="https://www.exemple.com"
+                  id="imageUrl"
+                  value={editedShop.imageUrl || ''}
+                  onChange={(e) => handleFieldChange('imageUrl', e.target.value)}
+                  placeholder="https://exemple.com/logo.jpg"
                 />
               </div>
             </div>

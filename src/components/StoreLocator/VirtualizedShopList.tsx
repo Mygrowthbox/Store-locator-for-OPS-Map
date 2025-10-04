@@ -140,7 +140,17 @@ const VirtualizedShopList: React.FC<VirtualizedShopListProps> = ({
           {sortedShops.map((shop) => (
             <Card key={shop.id} className="p-4 hover:shadow-lg transition-shadow">
               <div className="flex justify-between items-start mb-2">
-                <div className="flex-1 cursor-pointer" onClick={() => onShopClick(shop)}>
+                <div className="flex items-center gap-3 flex-1 cursor-pointer" onClick={() => onShopClick(shop)}>
+                  {shop.imageUrl && (
+                    <img 
+                      src={shop.imageUrl} 
+                      alt={`Logo ${shop.name}`}
+                      className="h-10 w-10 rounded object-cover shrink-0"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  )}
                   <h3 className="font-semibold text-lg text-foreground line-clamp-1">{shop.name}</h3>
                 </div>
                 <div className="flex items-center gap-2 shrink-0 ml-2">
@@ -193,19 +203,17 @@ const VirtualizedShopList: React.FC<VirtualizedShopListProps> = ({
                     </div>
                   )}
                   {shop.website && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-auto p-1 text-xs text-accent hover:text-accent-foreground"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.open(shop.website, '_blank');
-                      }}
+                    <a
+                      href={shop.website}
+                      target="_blank"
+                      rel="nofollow noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="inline-flex items-center h-auto p-1 text-xs text-accent hover:text-accent-foreground hover:underline"
                     >
                       <Globe className="h-3 w-3 mr-1" />
                       Site web
                       <ExternalLink className="h-2 w-2 ml-1" />
-                    </Button>
+                    </a>
                   )}
                 </div>
               </div>
