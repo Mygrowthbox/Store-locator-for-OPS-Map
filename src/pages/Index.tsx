@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Shop, MapFilters } from '@/types/shop';
-import { loadShopsFromStorage, saveShopsToStorage } from '@/utils/shopStorage';
+import { saveShopsToStorage } from '@/utils/shopStorage';
+import shopsData from '@/data/shops.json';
 import SearchBar from '@/components/StoreLocator/SearchBar';
 import FilterPanel from '@/components/StoreLocator/FilterPanel';
 import MapView from '@/components/StoreLocator/MapView';
@@ -14,17 +15,16 @@ const Index = () => {
   const [shops, setShops] = useState<Shop[]>([]);
   const { toast } = useToast();
   
-  // Load shops from localStorage on component mount
+  // Load shops from static JSON file on component mount
   useEffect(() => {
-    const savedShops = loadShopsFromStorage();
     // Deduplicate shops by ID to avoid showing duplicates
     const uniqueShops = Array.from(
-      new Map(savedShops.map(shop => [shop.id, shop])).values()
+      new Map(shopsData.map(shop => [shop.id, shop])).values()
     );
-    console.log('Shops loaded from storage:', savedShops.length);
+    console.log('Shops loaded from JSON:', shopsData.length);
     console.log('Unique shops after deduplication:', uniqueShops.length);
     console.log('Sample shops:', uniqueShops.slice(0, 3));
-    setShops(uniqueShops);
+    setShops(uniqueShops as Shop[]);
   }, []);
 
   const [filters, setFilters] = useState<MapFilters>({
