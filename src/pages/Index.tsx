@@ -150,16 +150,11 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <div className="container mx-auto px-4 py-8">
-        {/* Main Application */}
-          <div className="space-y-6">
-            {/* Search Section */}
-            <Card className="p-6 shadow-card">
-              <div className="flex items-center gap-3 mb-4">
-                <MapPin className="h-5 w-5 text-primary" />
-                <h2 className="text-xl font-semibold">Recherche et Filtres</h2>
-              </div>
-              <SearchBar onSearch={handleSearch} />
-            </Card>
+        <div className="space-y-6">
+          {/* Search Section */}
+          <Card className="p-6 shadow-card">
+            <SearchBar onSearch={handleSearch} />
+          </Card>
 
             {/* Filters and Map Section */}
             <div className="grid lg:grid-cols-4 gap-6">
